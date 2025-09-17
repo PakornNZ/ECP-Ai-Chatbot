@@ -1,1 +1,1 @@
-สวัสดี
+Retrieval-Augmented Generation + Fine-Tuning QLoRA to GGUF (Q4_K_M)
