@@ -1,0 +1,11 @@
+FROM guff_model_8b-q4_k_m.gguf
+
+TEMPLATE """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+{{ .System }}<|eot_id|><|start_header_id|>user<|end_header_id|>
+
+{{ .Prompt }}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+"""
+PARAMETER stop "<|start_header_id|>"
+PARAMETER stop "<|eot_id|>"
+PARAMETER stop "<|end_header_id|>"

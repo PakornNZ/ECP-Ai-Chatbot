@@ -1,0 +1,162 @@
+name: ecpai
+
+services:
+  database-qdrant:
+    image: qdrant/qdrant
+    container_name: ecpai-database-qdrant
+    environment:
+      TZ: Asia/Bangkok
+    restart: unless-stopped
+    volumes:
+      - ./database/qdrant/storage:/qdrant/storage
+    networks:
+      - ecpai-net
+  database-postgres:
+    image: postgres:17
+    container_name: ecpai-database-postgres
+    environment:
+      TZ: Asia/Bangkok
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    restart: unless-stopped
+    volumes:
+      - ./database/postgre/storage:/var/lib/postgresql/data
+    networks:
+      - ecpai-net
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.prod
+    container_name: ecpai-frontend
+    environment:
+      TZ: Asia/Bangkok
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      PRIVATE_API_AUTH: ${PRIVATE_API_AUTH}
+      PRIVATE_API_DATA: ${PRIVATE_API_DATA}
+      PRIVATE_API_CHAT: ${PRIVATE_API_CHAT}
+      PRIVATE_API_DASHBOARD: ${PRIVATE_API_DASHBOARD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      LINE_CLIENT_ID: ${LINE_CLIENT_ID}
+      LINE_CLIENT_SECRET: ${LINE_CLIENT_SECRET}
+      LIFF_ID: ${LIFF_ID}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - ecpai-net
+  backend-user:
+    build:
+      context: .
+      dockerfile: backend/user/Dockerfile
+    container_name: ecpai-backend-user
+    environment:
+      TZ: Asia/Bangkok
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+    restart: unless-stopped
+    networks:
+      - ecpai-net
+  backend-data:
+    build:
+      context: .
+      dockerfile: backend/data/Dockerfile
+    container_name: ecpai-backend-data
+    environment:
+      TZ: Asia/Bangkok
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+    restart: unless-stopped
+    networks:
+      - ecpai-net
+  backend-chat:
+    build:
+      context: .
+      dockerfile: backend/chat/Dockerfile
+    container_name: ecpai-backend-chat
+    environment:
+      TZ: Asia/Bangkok
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      COLLECTION_NAME: ${COLLECTION_NAME}
+      QDRANT_SIZE: ${QDRANT_SIZE}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      LINE_CHANNEL_ACCESS_TOKEN: ${LINE_CHANNEL_ACCESS_TOKEN}
+      LINE_CHANNEL_SECRET: ${LINE_CHANNEL_SECRET}
+      OLLAMA_HOST: ${OLLAMA_HOST}
+      OLLAMA_PORT: ${OLLAMA_PORT}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL}
+      RESPONSE_MODEL: ${RESPONSE_MODEL}
+    ports:
+      - "8020:8020"
+    restart: unless-stopped
+    volumes:
+      - ./ai/embed/:/app/embed
+    networks:
+      - ecpai-net
+  backend-dashboard:
+    build:
+      context: .
+      dockerfile: backend/dashboard/Dockerfile
+    container_name: ecpai-backend-dashboard
+    environment:
+      TZ: Asia/Bangkok
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      COLLECTION_NAME: ${COLLECTION_NAME}
+      QDRANT_SIZE: ${QDRANT_SIZE}
+      TYPHOON_OCR_API_KEY: ${TYPHOON_OCR_API_KEY}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL}
+      EMBEDDING_TOKENIZER: ${EMBEDDING_TOKENIZER}
+    restart: unless-stopped
+    volumes:
+      - ./ai/embed/:/app/embed
+    networks:
+      - ecpai-net
+  ollama:
+    build:
+      context: .
+      dockerfile: ai/Dockerfile
+    container_name: ecpai-ollama
+    restart: unless-stopped
+    environment:
+      RESPONSE_MODEL: ${RESPONSE_MODEL}
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           capabilities: [gpu]
+    #           count: all
+    volumes:
+      - ./ai/ollama/storage:/root/.ollama
+      - ./ai/finetune:/app/finetune
+    networks:
+      - ecpai-net
+
+networks:
+  ecpai-net:
+    name: ecpai-net
+    driver: bridge

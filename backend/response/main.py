@@ -1,0 +1,300 @@
+from core.model import  *
+from core.vec_database import *
+from datetime import datetime, timedelta
+import requests
+from dotenv import load_dotenv
+import os
+import re
+load_dotenv()
+
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "ollama")
+OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
+RESPONSE_MODEL = os.getenv("RESPONSE_MODEL")
+
+RESPONSE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/chat"
+
+
+# ! LlamaIndex Config
+from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.vector_stores.qdrant import QdrantVectorStore
+
+embedding_model = HuggingFaceEmbedding(model_name=EMBEDDING_MODEL)
+
+vector_store = QdrantVectorStore(
+    collection_name=COLLECTION_NAME,
+    client=client,
+    text_key="content"
+)
+
+storage_ctx = StorageContext.from_defaults(vector_store=vector_store)
+vector_index = VectorStoreIndex.from_vector_store(
+    vector_store=vector_store,
+    storage_context=storage_ctx,
+    embed_model=embedding_model,
+)
+
+retriever = vector_index.as_retriever(
+    similarity_top_k=5,
+)
+
+
+
+# ! ดึงข้อมูลจากฐานข้อมูล Vector ด้วย LlamaIndex
+
+def retriever_context_with_llamaindex(
+        user_query: str,
+        add_day_hint: bool = True
+) -> tuple[str, str] :
+    
+    query = user_query
+    verify_date = query_search_day(user_query) if add_day_hint else ""
+
+    if verify_date:
+        query = f"{query}\n{verify_date}"
+    
+    nodes = retriever.retrieve(query)
+    parts = []
+    for i, n in enumerate(nodes, start=1):
+        meta = n.node.metadata or {}
+        text = meta.get("content", "-")
+        name = meta.get("name", "-")
+        detail = meta.get("detail", "")
+        chunk_idx = meta.get("chunk_index", "")
+
+        header = (
+            f"\n#Document [{name}]\n"
+            f"#Description [{detail if detail else '-'}]\n"
+            f"#Chunk index [{chunk_idx}]\n"
+        )
+        text = text.replace('[EOL]', '\n')
+        parts.append(f"{header}\n{text}")
+        print(f"[SCORE]: {getattr(n, 'score', 0):.4f}")
+    vector_data = "\n\n\n".join(parts) if parts else ""
+
+    return  vector_data, (verify_date or "")
+
+
+
+# ! สร้างคำถามจากโมเดล AI สำหรับผู้มาเยือน
+
+def modelAi_response_guest_llamaindex(query: str) -> str:
+    try:
+        vector_data, verify_date = retriever_context_with_llamaindex(
+            user_query=query
+        )
+
+        prompt = f"""
+{"[DATE HINT]: " + verify_date if verify_date else "" + "\n"}
+-----
+[REFERENCE DATA]:
+{vector_data if vector_data else "-"}
+-----
+
+[USER QUERY]:
+{query}
+"""
+        answer = model_generate_answer(prompt)
+        return answer
+    except Exception as e:
+        return ""
+
+
+
+# ! สร้างคำถามจากโมเดล AI สำหรับผู้ใช้งาน
+
+def modelAi_response_user_llamaindex(
+    query: str,
+    recent_message_text: str | None = None,
+    recent_query: str | None = None
+) -> str:
+    query_search = query
+    if recent_query != "" and recent_query is not None:
+        query_search = recent_query
+    
+    try :
+        vector_data, verify_date = retriever_context_with_llamaindex(
+            user_query=query_search
+        )
+
+        prompt = f"""
+{"[DATE HINT]: " + verify_date if verify_date else "" + "\n"}
+-----
+[REFERENCE DATA]:
+{vector_data if vector_data else "-"}
+-----
+{f"""
+-----
+[HISTORY]:
+{recent_message_text}
+-----
+""" if recent_message_text else "" }
+[USER QUERY]:
+{query}
+"""
+
+        answer = model_generate_answer(prompt)
+        return answer if answer else ""
+    except Exception as e:
+        return ""
+
+
+
+# ! ค้นหาวันที่จากคำถาม
+
+def query_search_day(query: str) -> str | None:
+    now = datetime.now()
+
+    thai_day = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"]
+    thai_month = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
+    thai_year = now.year + 543
+    today_keywords = ["วัน", "วันนี้", "ปัจจุบัน", "ตอนนี้", "เดี๋ยวนี้", "ขณะนี้", "เดือน", "ปีนี้", "กี่โมง", "เวลา", "โมง", "นาที"]
+    yesterday_keywords = ["เมื่อวาน", "วานนี้", "เมื่อวาน", "วันก่อน", "เมื่อวา"]
+    tomorrow_keywords = ["พรุ่งนี้", "วันถัดไป", "วันต่อไป", "วันหน้า", "วันพรุ"]
+
+    if any(keyword in query for keyword in yesterday_keywords):
+        prev_day = now - timedelta(days=1)
+        return f"\n\nเมื่อวาน วัน{thai_day[int(prev_day.strftime('%w'))]} ที่ {prev_day.day} {thai_month[prev_day.month - 1]} พ.ศ. {thai_year} เวลา {now.strftime('%H:%M')}"
+    elif any(keyword in query for keyword in tomorrow_keywords):
+        next_day = now + timedelta(days=1)
+        return f"\n\nพรุ่งนี้ วัน{thai_day[int(next_day.strftime('%w'))]} ที่ {next_day.day} {thai_month[next_day.month - 1]} พ.ศ. {thai_year} เวลา {now.strftime('%H:%M')}"
+    elif any(keyword in query for keyword in today_keywords):
+        return f"\n\nวันนี้ วัน{thai_day[int(now.strftime('%w'))]} ที่ {now.day} {thai_month[now.month - 1]} พ.ศ. {thai_year} เวลา {now.strftime('%H:%M')}"
+    
+    return None
+
+
+
+# ! จัดรูปแบบข้อความ
+
+def format_recent_message(recent_messages: list[dict]) -> str:
+    recent_message_text = ""
+    for index, msg in enumerate(recent_messages[::-1], 1):
+        recent_message_text += f"Q{index}: {msg.query_message}\n"
+        recent_message_text += f"A{index}: {msg.response_message}\n\n"
+    return recent_message_text
+
+
+
+# ! จัดรูปแบบคำถามล่าสุด
+
+def format_recent_query(query: str, recent_message: list[dict]) -> str:
+    return query
+
+
+
+# ! สร้างคำตอบจากโมเดล AI
+
+def model_generate_answer(prompt: str) -> str:
+
+    message = [
+        {
+            "role": "system",
+            "content": (
+                "You are an intelligent assistant that answers questions **only in Thai**."
+                "You must use only the information from [REFERENCE DATA]."
+                " If no relevant information is found in [REFERENCE DATA],"
+                " you should politely respond in a natural"
+            )
+        },
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+
+    
+    try:
+        response = requests.post(
+            RESPONSE_URL,
+            json={
+                "model": RESPONSE_MODEL,
+                "messages": message,
+                "stream": False,
+                "options": {
+                    "temperature": 0.4,
+                    "top_p": 0.9,
+                    "max_tokens": 2048
+                }
+            }
+        )
+        response.raise_for_status()
+        result = response.json().get("message", {}).get("content", "").strip()
+
+        return result
+    except Exception as e:
+        print(f"Error in model_generate_answer: {e}")
+        return ""
+
+
+
+# ! สร้างหัวข้อบทสนทนา
+
+def modelAi_topic_chat(query: str) -> str :
+    message = [
+        {
+            "role": "system",
+            "content": (
+                "คุณคือผู้ช่วยในการตั้งชื่อหัวข้อบทสนทนาจากคำถามที่ได้รับ คุณจะต้องตอบคำถามเป็นชื่อหัวข้อที่สั้นและกระชับและเข้าใจ เช่น\n"
+                "คำถาม: ฉันจะเดินทางไปอาคาร3ได้อย่างไร\nคำตอบ: เส้นทางไปอาคาร 3\n"
+                "คำถาม: สวัสดี ยินดีที่ได้รู้จัก\nคำตอบ: การทักทาย\n"
+                "คำถาม: ขอตารางสอนวันจันทร์ของอาจารย์\nคำตอบ: ตารางสอนของอาจารย์\n"
+                "คำถาม: แบบฟอร์มคำร้องนักศึกษารหัส RE.09\nคำตอบ: แบบฟอร์ม RE.09\n"
+            )
+        },
+        {
+            "role": "user",
+            "content": f"""[Role]: หน้าที่ของคุณคือการวิเคราะห์ข้อความของผู้ใช้และระบุประเภทของคำถามด้วยคำศัพท์เพียงคำเดียวหรือวลีสั้นๆ\n[คำถามเพื่อใช้สร้างหัวข้อ]: {query}"""
+        }
+    ]
+
+    try:
+        response = requests.post(
+            RESPONSE_URL,
+            json={
+                "model": RESPONSE_MODEL,
+                "messages": message,
+                "stream": False,
+                "options": {
+                    "temperature": 0.1,
+                    "top_p": 1,
+                    "max_tokens": 10,
+                }
+            }
+        )
+        response.raise_for_status()
+        result = response.json().get("message", {}).get("content", "").strip()
+        result = re.sub(r'[^\w\s\u0E00-\u0E7F]', '', result)
+        result.split()
+        return result
+    except Exception as e:
+        return ""
+
+
+
+# ! เรียก ollama
+
+async def modelAi_call_ollama():
+    message = [
+        {
+            "role": "user",
+            "content": ""
+        }
+    ]
+    try:
+        requests.post(
+            RESPONSE_URL,
+            json={
+                "model": RESPONSE_MODEL,
+                "messages": message,
+                "stream": False,
+                "options": {
+                    "temperature": 0.1,
+                    "top_p": 1,
+                    "max_tokens": 10,
+                }
+            }
+        )
+    except Exception as e:
+        print(f"Error in modelAi_call_ollama: {e}")
