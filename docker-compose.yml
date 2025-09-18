@@ -8,7 +8,7 @@ services:
       TZ: Asia/Bangkok
     restart: unless-stopped
     volumes:
-      - ./database/qdrant/storage:/qdrant/storage
+      - qdrant-volume:/qdrant/storage
     networks:
       - ecpai-net
   database-postgres:
@@ -21,7 +21,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     restart: unless-stopped
     volumes:
-      - ./database/postgre/storage:/var/lib/postgresql/data
+      - postgres-volume:/var/lib/postgresql/data
     networks:
       - ecpai-net
   frontend:
@@ -151,10 +151,18 @@ services:
     #           capabilities: [gpu]
     #           count: all
     volumes:
-      - ./ai/ollama/storage:/root/.ollama
+      - ollama-volume:/root/.ollama
       - ./ai/finetune:/app/finetune
     networks:
       - ecpai-net
+
+volumes:
+  qdrant-volume:
+    name: qdrant-volume
+  postgres-volume:
+    name: postgres-volume
+  ollama-volume:
+    name: ollama-volume
 
 networks:
   ecpai-net:
