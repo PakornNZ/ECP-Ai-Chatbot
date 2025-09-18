@@ -1,5 +1,6 @@
 # **Chatbot with Retrieval-Augmented Generation (RAG) + Fine-Tuning (QLoRA to GGUF Q4_K_M)**
 
+**For students of Rajamangala University of Technology Isan Khon Kaen Campus**\
 This project implements a chatbot powered by Retrieval-Augmented Generation (RAG) combined with fine-tuned LLMs using QLoRA exported to GGUF (Q4_K_M) format for efficient inference.
 Deployment is containerized via Docker for streamlined setup and scaling.
 
@@ -72,3 +73,17 @@ docker compose up -d
 ```
 After containers are built, wait 3–5 minutes for internal setup.\
 Once ready, you can access and interact with the chatbot.
+
+> IMPORTANT \
+> If your system has CUDA-enabled NVIDIA GPUs, you can enable GPU support for the Ollama service by modifying `docker-compose.yml`.
+> Uncomment and adjust the following section under the Ollama service:
+```
+# deploy:
+#   resources:
+#     reservations:
+#       devices:
+#         - driver: nvidia
+#           capabilities: [gpu]
+#           count: all
+```
+This will allow Docker to allocate GPU resources for model inference, which can significantly improve performance.
