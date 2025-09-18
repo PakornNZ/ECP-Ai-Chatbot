@@ -1,4 +1,4 @@
-FROM guff_model_8b-q4_k_m.gguf
+FROM llama3.1_8b-q4_k_m/guff_model_8b-q4_k_m.gguf
 
 TEMPLATE """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
