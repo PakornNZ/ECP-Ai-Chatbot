@@ -458,13 +458,13 @@ def handle_location(event: MessageEvent):
 
 # ! เรียก Ollama
 
-async def call_ollama():
-    try:
-        await modelAi_call_ollama()
-    except Exception as e:
-        print(f"Not found ollama model: {e}")
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+# async def call_ollama():
+#     try:
+#         await modelAi_call_ollama()
+#     except Exception as e:
+#         print(f"Not found ollama model: {e}")
+# from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-scheduler = AsyncIOScheduler()
-scheduler.add_job(func=call_ollama, trigger='interval', minutes=4)
-scheduler.start()
+# scheduler = AsyncIOScheduler()
+# scheduler.add_job(func=call_ollama, trigger='interval', minutes=4)
+# scheduler.start()
