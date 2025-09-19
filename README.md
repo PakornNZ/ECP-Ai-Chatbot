@@ -47,7 +47,10 @@ ai/
 ```
 \
 **Step 3. Download Fine-Tuned Model (GGUF)**\
-Download the `Fine-Tuned Model GGUF` from Hugging Face: [Model GGUF.](https://huggingface.co/PakornNZ/llama3.1_8b-q4_k_m)
+Download the `Fine-Tuned Model GGUF` from Hugging Face: [Model GGUF.](https://huggingface.co/PakornNZ/llama3.1_8b-q4_k_m) \
+After that, go to `Files and Versions` and select the download `guff_model_8b-q4_k_m.gguf`.
+> You cannot use **git clone** for Hugging Face.
+
 
 Place the model inside:
 ```
