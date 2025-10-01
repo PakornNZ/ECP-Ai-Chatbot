@@ -21,6 +21,7 @@ import { Error } from "@/app/components/dashboard/Error"
 import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 import { useOnClickOutside } from "@/app/components/useOnClickOutside"
+import { useSearchParams } from "next/navigation"
 
 interface FilesProps {
     id: number
@@ -44,6 +45,14 @@ export default function Files() {
             desc: false
         }
     ])
+
+    const pathname = useSearchParams()
+    useEffect(() => {
+        const type = pathname.get('type') ?? ''
+        if (type === 'csv' || type === 'docx' || type === 'pdf' || type === 'txt') {
+            setFilterType(type)
+        }
+    }, [pathname])
 
     // * ข้อความแจ้งเตือน
     const [arlertMessage, setArlertMessage] = useState({

@@ -9,6 +9,7 @@ import axios from "axios"
 import { FolderOpen, Heart, ShieldUser, UserRound } from "lucide-react"
 import { useEffect, useState } from "react"
 import Image from 'next/image'
+import { useRouter } from "next/navigation"
 
 interface RatingBoardProps {
     rating: number,
@@ -44,6 +45,7 @@ interface BoardProps {
 
 export default function Dashboard () {
     const [boardData, setBoardData] = useState<BoardProps | null>(null)
+    const router = useRouter()
 
                         // * ดึงข้อมูล
                         const fetchBoardData = async () => {
@@ -104,21 +106,21 @@ export default function Dashboard () {
         <>
             <div className="station">
                 <div className="total-station">
-                    <div className="total-station-bg">
+                    <div className="total-station-bg" onClick={() => router.push('/dashboard/users')}>
                         <div className="total-station-data">
                             <UserRound/>
                             <h2>ผู้ใช้งาน</h2>
                         </div>
                         <p>{formatValue(boardData?.user.total ?? 0)}</p>
                     </div>
-                    <div className="total-station-bg">
+                    <div className="total-station-bg" onClick={() => router.push('/dashboard/messages')}>
                         <div className="total-station-data">
                             <Heart style={{ fill: 'var(--color-font-white)' }}/>
                             <h2>การให้คะแนน</h2>
                         </div>
                         <p>{formatValue(boardData?.rating.total ?? 0)}</p>
                     </div>
-                    <div className="total-station-bg">
+                    <div className="total-station-bg" onClick={() => router.push('/dashboard/files')}>
                         <div className="total-station-data">
                             <FolderOpen />
                             <h2>เอกสาร</h2>
@@ -128,7 +130,7 @@ export default function Dashboard () {
                 </div>
                 <div className="ratings-station">
                     <div className="rating-topic">
-                        <div className="topic-header">
+                        <div className="topic-header" onClick={() => router.push('/dashboard/messages')}>
                             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                 <Heart className="topic-icon"/>
                                 <span className="topic-span">คะแนนรวมเฉลี่ย</span>
@@ -139,7 +141,7 @@ export default function Dashboard () {
                         </div>
                         <div className="rating-score">
                             {boardData?.rating.detail.map((data, index) => 
-                                <div className="score-section" key={index}>
+                                <div className="score-section" key={index} onClick={() => router.push(`/dashboard/messages?rating=${data.rating}`)}>
                                     <div className="score-section-topic">
                                         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                             <span>{data.rating} คะแนน</span>
@@ -157,7 +159,7 @@ export default function Dashboard () {
                 </div>
                 <div className="files-station">
                     <div className="file-topic">
-                        <div className="topic-header">
+                        <div className="topic-header" onClick={() => router.push('/dashboard/files')}>
                             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                 <FolderOpen className="topic-icon" style={{ fill: 'none' }}/>
                                 <span className="topic-span">เอกสาร</span>
@@ -167,7 +169,7 @@ export default function Dashboard () {
                         </div>
                         <div className="files-list">
                             {boardData?.file.detail.map((data, index) => (
-                                <div className="file" key={index}>
+                                <div className="file" key={index} onClick={() => router.push(`/dashboard/files?type=${data.type}`)}>
                                     <div className="file-logo">
                                         <Image src={file_img(data.type) ?? ''} width={45} height={45} alt="file logo"/>
                                     </div>
@@ -182,7 +184,7 @@ export default function Dashboard () {
                 </div>
                 <div className="users-station">
                     <div className="user-topic">
-                        <div className="topic-header">
+                        <div className="topic-header" onClick={() => router.push('/dashboard/users')}>
                             <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                                 <UserRound className="topic-icon" style={{ fill: 'none' }}/>
                                 <span className="topic-span">บัญชีผู้ใช้งาน</span>
@@ -193,7 +195,7 @@ export default function Dashboard () {
                         </div>
                         <div className="user-detail">
                             {boardData?.user.detail.map((data, index) => (
-                                <div className="user" key={index}>
+                                <div className="user" key={index} onClick={() => router.push(`/dashboard/users?role=${data.role}`)}>
                                     <div className="user-info" style={{ width: '100%' }}>
                                         <h2>
                                             { data.role === 2 ? 

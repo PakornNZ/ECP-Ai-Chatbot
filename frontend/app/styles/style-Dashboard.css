@@ -122,6 +122,7 @@
     height: fit-content;
     background: var(--object);
     box-shadow: 0 0 0 1px var(--stroke);
+    cursor: pointer;
 }
 
 .topic-header h1 {
@@ -187,6 +188,7 @@
     background: radial-gradient(circle, #3b3b3b 10%, #303030 100%);
     border: none;
     box-shadow: 0 0 0 2px var(--stroke);
+    cursor: pointer;
 }
 
 .total-station-data {
@@ -235,6 +237,7 @@
 }
 
 .score-section {
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     padding: 10px;
@@ -299,6 +302,7 @@
 }
 
 .file {
+    cursor: pointer;
     display: flex;
     align-items: center;
     border-radius: 12px;
@@ -360,6 +364,7 @@
     background: var(--object);
     padding: 10px;
     color: var(--color-font);
+    cursor: pointer;
 }
 
 .user svg {

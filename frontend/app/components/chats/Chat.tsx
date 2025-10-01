@@ -7,6 +7,8 @@ import { Pencil, Check } from 'lucide-react'
 import axios from "axios"
 import MarkdownRenderer from "@/app/components/MarkdownRenderer"
 import { useSession } from "next-auth/react"
+import Image from "next/image";
+import chatBotIcon from "@/public/logo/logo.jpg"
 
 interface Message {
     id: number | null
@@ -93,7 +95,7 @@ export default function Chat({ MoveSection, message, isLoading, onUpdateQuery, o
                                     }
                                 } catch (error: unknown) {
                                     if (!axios.isAxiosError(error)) return
-                                    const errorMessage = error.response?.data?.message
+                                    const errorMessage = error.response?.data?.message || "ระบบไม่สามารถตอบกลับได้ในขณะนี้"
                                     setArlertMessage({
                                         color: false,
                                         message: errorMessage
@@ -163,7 +165,10 @@ export default function Chat({ MoveSection, message, isLoading, onUpdateQuery, o
                                             <p className="skeleton skeleton-text" style={{ width: "70%" }} />
                                         </>
                                     ) : (
-                                        <span><MarkdownRenderer content={e?.answer || ""}/></span>
+                                        <div style={{ display: "flex", gap: "10px" }}>
+                                            <Image src={chatBotIcon} width={25} height={25} alt="chat-response" style={{ borderRadius: "50%" }}/>
+                                            <span><MarkdownRenderer content={e?.answer || ""}/></span>
+                                        </div>
                                     )}
                                 </div>
                                 { !isWorkng && <ManageChat msg_id={e?.id} answer={e?.answer} isRating={e?.rating}/>}

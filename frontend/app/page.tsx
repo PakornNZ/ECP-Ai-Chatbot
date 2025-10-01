@@ -356,7 +356,7 @@ export default function Homepage() {
                   }
                 } catch (error: unknown) {
                   if (!axios.isAxiosError(error)) return
-                  const errorMessage = error.response?.data?.message
+                  const errorMessage = error.response?.data?.message || "ระบบไม่สามารถตอบกลับได้ในขณะนี้"
                   setArlertMessage({
                       color: false,
                       message: errorMessage
@@ -418,7 +418,7 @@ export default function Homepage() {
                                     }
                                   } catch (error: unknown) {
                                     if (!axios.isAxiosError(error)) return
-                                    const errorMessage = error.response?.data?.message
+                                    const errorMessage = error.response?.data?.message || "ระบบไม่สามารถตอบกลับได้ในขณะนี้"
                                     setArlertMessage({
                                         color: false,
                                         message: errorMessage

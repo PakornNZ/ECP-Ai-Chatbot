@@ -3,10 +3,6 @@ from passlib.hash import bcrypt
 
 from core.fastapi import *
 
-
-
-# ! ลงทะเบียนผู้ใช้งาน
-
 @app.post("/sign_up", tags=["USER"])
 def create_user(user: SignUpSchema, session: SessionDep):
     try :
@@ -98,9 +94,6 @@ def create_user(user: SignUpSchema, session: SessionDep):
         )
 
 
-
-# ! ส่งอีเมลยืนยันอีกครั้ง
-
 @app.put("/sign_up/resend_email", tags=["EMAIL"])
 def resend_email_verification(user: ResendEmailVerificationSchema, session: SessionDep):
     try :
@@ -178,8 +171,6 @@ def resend_email_verification(user: ResendEmailVerificationSchema, session: Sess
 
 
 
-# ! ยืนยันอีเมล
-
 @app.put("/email_verification", tags=["EMAIL"])
 def verify_email(user: VerifyEmailSchema, session: SessionDep):
     try :
@@ -256,8 +247,6 @@ def verify_email(user: VerifyEmailSchema, session: SessionDep):
 
 
 
-# ! ลืมรหัสผ่าน
-
 @app.post("/forgot_password", tags=["USER"])
 def forgot_password(user: ForgotPasswordSchema, session: SessionDep):
     try :
@@ -275,8 +264,21 @@ def forgot_password(user: ForgotPasswordSchema, session: SessionDep):
                     "data": {}
                 }
             )
-    
 
+        find_account = session.exec(
+            select(Accounts)
+            .where(Accounts.web_user_id == existing_email.web_user_id)
+        ).first()
+        if find_account and find_account.provider != "credentials":
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": 0,
+                    "message": f"อีเมลนี้ลงทะเบียนด้วย {find_account.provider} แล้ว",
+                    "data": {}
+                }
+            )
+        
         update_password_token = str(uuid4())
         
         update_password_token_expires = datetime.now() + timedelta(minutes=5)
@@ -338,8 +340,6 @@ def forgot_password(user: ForgotPasswordSchema, session: SessionDep):
         )
 
 
-
-# ! ตรวจสอบรหัสยืนยันการเปลี่ยนรหัสผ่าน
 
 @app.post("/check_user_by_update_password_token", tags=["USER"])
 def check_user_by_update_token(user: checkUserByUpdatePasswordTokenSchema, session: SessionDep):
@@ -408,9 +408,6 @@ def check_user_by_update_token(user: checkUserByUpdatePasswordTokenSchema, sessi
             }
         )
 
-
-
-# ! เปลี่ยนรหัสผ่าน
 
 @app.put("/update_password", tags=["USER"])
 def update_password(user: UpdatePasswordSchema, session: SessionDep):
@@ -486,9 +483,6 @@ def update_password(user: UpdatePasswordSchema, session: SessionDep):
         )
 
 
-
-# ! เปลี่ยนรหัสผ่าน (ขณะล็อกอินอยู่)
-
 @app.put("/change_password", tags=["USER"])
 def change_password(user: ChangePasswordSchema, session: SessionDep):
     try :
@@ -541,8 +535,56 @@ def change_password(user: ChangePasswordSchema, session: SessionDep):
         )
 
 
+# @app.post("/check_email", tags=["USER"])
+# def check_email(user: CheckEmail, session: SessionDep):
+#     try :
+#         find_user_by_email = session.exec(
+#             select(WebUsers).where(WebUsers.email == user.email)
+#         ).first()
 
-# ! เข้าสู่ระบบ
+#         if not find_user_by_email:
+#             return JSONResponse(
+#                 status_code=404,
+#                 content={
+#                     "status": 0, 
+#                     "message": "ไม่พบผู้ใช้งาน", 
+#                     "data": {}
+#                 }
+#             )
+
+#         google_account = session.exec(
+#             select(Accounts)
+#             .where(Accounts.web_user_id == find_user_by_email.web_user_id)
+#             .where(Accounts.provider == "google")
+#         ).first()
+
+#         if google_account:
+#             return JSONResponse(
+#                 status_code=400,
+#                 content={
+#                     "status": 0, 
+#                     "message": "อีเมลนี้ลงทะเบียนด้วย Google Login แล้ว", 
+#                     "data": {}
+#                 }
+#             )
+        
+#         return JSONResponse(
+#             status_code=200,
+#             content={
+#                 "status": 1, 
+#                 "message": "", 
+#                 "data": {}
+#             }
+#         )
+#     except Exception as error :
+#         return JSONResponse(
+#             status_code=500,
+#             content={
+#                 "status": 0,
+#                 "message": str(error),
+#                 "data": {}
+#             }
+#         )
 
 @app.post("/sign_in", tags=["USER"])
 def sign_in(user: SignInSchema, session: SessionDep):
@@ -677,10 +719,6 @@ def sign_in(user: SignInSchema, session: SessionDep):
                 "data": {}
             }
         )
-
-
-
-# ! เข้าสู่ระบบด้วย OAuth
 
 @app.post("/auth/oauth", tags=["USER"])
 def oauth_login(data: dict, session: SessionDep):
@@ -855,3 +893,8 @@ def oauth_login(data: dict, session: SessionDep):
                 "data": {}
             }
         )
+
+# ! รัน FastAPI
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)

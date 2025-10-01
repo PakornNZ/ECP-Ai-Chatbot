@@ -22,6 +22,7 @@ import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 import Loading from "@/app/components/dashboard/LoadingFull"
 import { Error } from "@/app/components/dashboard/Error"
+import { useSearchParams } from "next/navigation"
 
 interface MessageProps {
     id: number
@@ -127,6 +128,14 @@ export default function Messages() {
 
     // * กรองข้อมูล สำหรับค้นหา
     const [filterRating, setFilterRating] = useState<string>("")
+
+    const pathname = useSearchParams()
+        useEffect(() => {
+            const rating = pathname.get('rating') ?? ''
+            if (rating === '1' || rating === '2' || rating === '3' || rating === '4' || rating === '5' || rating === '0') {
+                setFilterRating(rating)
+            }
+        }, [pathname])
 
     const filteredData = useMemo(() => {
         return msgData.filter(msg => {

@@ -7,12 +7,10 @@ import os
 import re
 load_dotenv()
 
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "ollama")
-OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
+RESPONSE_URL = os.getenv("OLLAMA_URL")
 RESPONSE_MODEL = os.getenv("RESPONSE_MODEL")
 
-RESPONSE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/chat"
 
 
 # ! LlamaIndex Config
@@ -39,9 +37,25 @@ retriever = vector_index.as_retriever(
     similarity_top_k=5,
 )
 
+# query_engine = RetrieverQueryEngine.from_args(retriever)
 
 
-# ! ดึงข้อมูลจากฐานข้อมูล Vector ด้วย LlamaIndex
+# ! สร้างเวกเตอร์จากคำถาม
+
+# def embedding_query(query: str) -> list[float]:
+#     embedding = []
+    # embedding = embedding_model.encode(query, normalize_embeddings=True)
+    # return embedding
+    # payload = {
+    #     "model": EMBEDDING_MODEL,
+    #     "prompt": query
+    # }
+    # response = requests.post(EMBEDDING_URL, json=payload)
+    # response.raise_for_status()
+    # embedding = np.array(response.json()["embedding"], dtype=np.float32)
+    # norm = np.linalg.norm(embedding)
+    # if norm > 0:
+    #     embedding = embedding / norm
 
 def retriever_context_with_llamaindex(
         user_query: str,
@@ -77,7 +91,22 @@ def retriever_context_with_llamaindex(
 
 
 
-# ! สร้างคำถามจากโมเดล AI สำหรับผู้มาเยือน
+# ! สร้างคำตอบจากโมเดล AI สำหรับผู้มาเยือน
+
+# async def modelAi_response_guest(query: str) -> str:
+#     vector_data, verify_date = search_retrieval(query)
+
+    # message = [{"role": "system", "content": "คุณคือผู้ช่วยอัจฉริยะที่สามารถตอบคำถามจากข้อมูลที่ให้ คุณจะต้องตอบคำถามอย่างชัดเจนและกระชับ โดยอิงจากข้อมูลที่มีอยู่ คุณจะต้องตอบคำถามตามข้อมูลที่ให้มาและไม่ควรสร้างข้อมูลใหม่ขึ้นมา"}]
+#     if verify_date and len(verify_date) > 0:
+#         message.append({"role": "user", "content": f"""{verify_date}"""})
+#     message.append({"role": "user", "content": f"""เอกสารจากระบบ:\n{vector_data}"""})
+#     message.append({"role": "user", "content": f"""คำถามจากผู้ใช้: {query}"""})
+
+    # return await model_generate_answer(message)
+
+
+
+# ! สร้างคำถามจากโมเดล AI สำหรับผู้ใช้งาน
 
 def modelAi_response_guest_llamaindex(query: str) -> str:
     try:
@@ -85,24 +114,27 @@ def modelAi_response_guest_llamaindex(query: str) -> str:
             user_query=query
         )
 
+# [ROLE]: You are an intelligent assistant that answers questions **only in Thai**.  
+# You must use only the information from [REFERENCE DATA].
         prompt = f"""
+-----
+[USER QUERY]:
+{query}
+-----
+
 {"[DATE HINT]: " + verify_date if verify_date else "" + "\n"}
 -----
 [REFERENCE DATA]:
 {vector_data if vector_data else "-"}
 -----
-
-[USER QUERY]:
-{query}
 """
+
         answer = model_generate_answer(prompt)
         return answer
     except Exception as e:
         return ""
 
 
-
-# ! สร้างคำถามจากโมเดล AI สำหรับผู้ใช้งาน
 
 def modelAi_response_user_llamaindex(
     query: str,
@@ -118,7 +150,19 @@ def modelAi_response_user_llamaindex(
             user_query=query_search
         )
 
+# If no relevant information is found in [REFERENCE DATA],  
+# you should politely respond in a natural Thai way such as:  
+# - "ขออภัย ไม่พบข้อมูลที่เกี่ยวข้องกับคำถามนี้"  
+# - "ตอนนี้ยังไม่มีข้อมูลเพียงพอสำหรับคำถามนี้"  
+# - "ไม่สามารถหาข้อมูลที่เกี่ยวข้องได้จากข้อมูลอ้างอิง"
+# [ROLE]: You are an intelligent assistant that answers questions **only in Thai**.  
+# You must use only the information from [REFERENCE DATA].
         prompt = f"""
+-----
+[USER QUERY]:
+{query}
+-----
+
 {"[DATE HINT]: " + verify_date if verify_date else "" + "\n"}
 -----
 [REFERENCE DATA]:
@@ -130,14 +174,72 @@ def modelAi_response_user_llamaindex(
 {recent_message_text}
 -----
 """ if recent_message_text else "" }
-[USER QUERY]:
-{query}
 """
 
         answer = model_generate_answer(prompt)
         return answer if answer else ""
     except Exception as e:
         return ""
+
+
+# ! ค้นหาข้อมูลจากฐานข้อมูล Vector
+
+# def search_retrieval(query: str) -> str:
+#     verify_date = ""
+#     verify_query = query
+#     verify_date = query_search_day(query)
+#     if verify_date and len(verify_date) > 0:
+#         verify_query += verify_date
+
+#     embed_query = embedding_query(verify_query)
+#     if embed_query is None or len(embed_query) == 0:
+#         return ""
+
+    # session.execute(text("SET hnsw.ef_search = 100;"))
+    # get_vector_data_pg = session.exec(
+    #     select(RagChunks)
+    #     .options(selectinload(RagChunks.ragfiles))
+    #     .order_by(RagChunks.vector.op('<=>')(embed_query))
+    #     .limit(5)
+    # ).all()
+
+    # * ค้นหาข้อมูลจากฐานข้อมูล Vector
+    # get_vector_data = client.search(
+    #     collection_name=COLLECTION_NAME,
+    #     query_vector=embed_query.tolist(),
+    #     limit=5,
+    #     with_payload=True,
+    # )
+    # if not get_vector_data:
+    #     return ""
+
+    # vector_data_pg = ""
+    # vector_data = ""
+    # print(f"\n\nGet Vector Data <PG>\n\n")
+    # for data in get_vector_data_pg:
+    #     embed_query = np.array(embed_query, dtype=np.float32)
+    #     score = np.dot(embed_query, data.vector)
+    #     print(f"Score Id : {score:.4f}")
+        # print(f"Score Id {data.id}: {data.score:.4f}")
+
+        # if get_file_id != data.rag_file_id:
+        #     vector_data += f"\nชื่อเอกสาร : {data.ragfiles.name}"
+        #     vector_data += f"รายละเอียด : {data.ragfiles.detail if data.ragfiles.detail else '-'}"
+        # vector_data_pg += f"{data.content}\n\n"
+        # else:
+        #     vector_data += f"\n{data.content}"
+        # if data.payload:
+        #     vector_data += f"{data.payload.get('content', '')}\n\n"
+
+    # print(f"\n\nGet Vector Data <Qdrant>\n\n")
+    # for data in get_vector_data:
+    #     print(f"Score Id {data.id}: {data.score:.4f}")
+    #     if data.payload:
+    #         vector_data += f"{data.payload.get('content', '')}\n\n"
+
+    # print(f"\n\nVector Data <PG>: \n{vector_data_pg}\n")
+    # print(f"\n\nVector Data <Qdrant>: \n{vector_data}\n")
+    # return vector_data, verify_date
 
 
 
@@ -166,8 +268,6 @@ def query_search_day(query: str) -> str | None:
 
 
 
-# ! จัดรูปแบบข้อความ
-
 def format_recent_message(recent_messages: list[dict]) -> str:
     recent_message_text = ""
     for index, msg in enumerate(recent_messages[::-1], 1):
@@ -176,10 +276,8 @@ def format_recent_message(recent_messages: list[dict]) -> str:
     return recent_message_text
 
 
-
-# ! จัดรูปแบบคำถามล่าสุด
-
 def format_recent_query(query: str, recent_message: list[dict]) -> str:
+    # return f"{query}\n{recent_message[0].query_message}" if recent_message else query
     return query
 
 
@@ -187,6 +285,9 @@ def format_recent_query(query: str, recent_message: list[dict]) -> str:
 # ! สร้างคำตอบจากโมเดล AI
 
 def model_generate_answer(prompt: str) -> str:
+    # print("-------------------------------------------------------------------")
+    # print(f"Prompt: \n\n{prompt}")
+
 
     message = [
         {
@@ -241,6 +342,7 @@ def modelAi_topic_chat(query: str) -> str :
                 "คำถาม: สวัสดี ยินดีที่ได้รู้จัก\nคำตอบ: การทักทาย\n"
                 "คำถาม: ขอตารางสอนวันจันทร์ของอาจารย์\nคำตอบ: ตารางสอนของอาจารย์\n"
                 "คำถาม: แบบฟอร์มคำร้องนักศึกษารหัส RE.09\nคำตอบ: แบบฟอร์ม RE.09\n"
+                # "คำถาม: ECP4R\nคำตอบ: ECP4R\n"
             )
         },
         {
@@ -270,7 +372,37 @@ def modelAi_topic_chat(query: str) -> str :
         return result
     except Exception as e:
         return ""
+    
 
+
+
+# ! ใช้สำหรับการทดสอบ
+
+def modelAi_response_testing_llamaindex(query: str) -> str:
+    try:
+        vector_data, verify_date = retriever_context_with_llamaindex(
+            user_query=query
+        )
+
+        prompt = f"""
+{"[DATE HINT]: " + verify_date if verify_date else ""}
+
+-----
+[REFERENCE DATA]:
+{vector_data if vector_data else "-"}
+-----
+
+[QUESTION]:
+{query}
+"""
+        # print("-------------------------------------------------------------------\n\n")
+        # print(prompt)
+        # print("\n\n-------------------------------------------------------------------")
+
+        return prompt
+    except Exception as e:
+        return ""
+    
 
 
 # ! เรียก ollama

@@ -1,9 +1,5 @@
 from core.fastapi import *
 
-
-
-# ! ตรวจสอบห้องแชทและดึงข้อมูลการสนทนา
-
 @app.get("/user/verification_chat", tags=["USER"])
 def verification_chat(chat_id: int, session: SessionDep, user = Depends(get_user)):
 
@@ -69,9 +65,6 @@ def verification_chat(chat_id: int, session: SessionDep, user = Depends(get_user
         )
 
 
-
-# ! ดึงประวัติการสนทนาทั้งหมดของผู้ใช้
-
 @app.get("/user/history", tags=["USER"])
 def history_chat(session: SessionDep, user = Depends(get_user)):
 
@@ -115,9 +108,6 @@ def history_chat(session: SessionDep, user = Depends(get_user)):
             }
         )
 
-
-
-# ! บันทึกคะแนนการตอบกลับของระบบ
 
 @app.put("/data/rating", tags=["DATA"])
 def respone_rating(data: NewRatingSchema, session: SessionDep, user = Depends(get_user)):
@@ -164,9 +154,6 @@ def respone_rating(data: NewRatingSchema, session: SessionDep, user = Depends(ge
         )
 
 
-
-# ! เปลี่ยนชื่อห้องแชท
-
 @app.put("/data/chat_name", tags=["DATA"])
 def chat_name(data: ChatNameSchema, session: SessionDep, user = Depends(get_user)):
 
@@ -211,9 +198,6 @@ def chat_name(data: ChatNameSchema, session: SessionDep, user = Depends(get_user
             }
         )
 
-
-
-# ! ลบห้องแชท
 
 @app.put("/data/chat_delete", tags=["DATA"])
 def chat_delete(data: ChatDeleteSchema, session: SessionDep, user = Depends(get_user)):

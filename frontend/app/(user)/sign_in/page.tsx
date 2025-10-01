@@ -469,9 +469,9 @@ function SingIn() {
                                 <div className={`form-data ${nextState ? "next" : ""}`}>
                                     <p><AtSign />อีเมล</p>
                                     <div className="input-container">
-                                        <input type="text" 
+                                        <input type="text"
                                             maxLength={40} 
-                                            placeholder="กรอกอีเมล" 
+                                            placeholder="กรอกที่อยู่อีเมล @rmuti.ac.th" 
                                             value={lgEmail}
                                             onChange={emailLogin}
                                             onBlur={reCheckDomainLg}/>

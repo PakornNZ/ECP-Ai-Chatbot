@@ -20,7 +20,7 @@ import { useQuery } from '@tanstack/react-query'
 import Loading from "@/app/components/dashboard/LoadingFull"
 import { Error } from "@/app/components/dashboard/Error"
 import { encrypt } from "@/utils/crypto"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useOnClickOutside } from "@/app/components/useOnClickOutside"
 import Image from "next/image"
 
@@ -151,6 +151,14 @@ export default function Users() {
     const [filterRole, setFilterRole] = useState<string>("")
     const [filterVerified, setFilterVerified] = useState<string>("")
     const [filterProvider, setFilterProvider] = useState<string[]>([])
+
+    const pathname = useSearchParams()
+    useEffect(() => {
+        const role = pathname.get('role') ?? ''
+        if (role === '1' || role === '2') {
+            setFilterRole(role == '1' ? 'user' : 'admin')
+        }
+    }, [pathname])
 
     const handleActiveRow = async (row: UserProps | null) => {
         if (!row) return

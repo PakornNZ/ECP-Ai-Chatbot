@@ -6,11 +6,6 @@ import uuid
 
 SAVE_FILE = Path() / "files_storage"
 SAVE_TEXT = Path() / "files_text"
-
-
-
-# ! ดึงข้อมูลผู้ใช้งานทั้งหมด
-
 @app.get("/dashboard/user", tags=["Dashboard"])
 def dashboard_user(session: SessionDep, user = Depends(get_user)):
 
@@ -69,9 +64,6 @@ def dashboard_user(session: SessionDep, user = Depends(get_user)):
         )
 
 
-
-# ! ดึงข้อมูลเอกสารทั้งหมด
-
 @app.get("/dashboard/file", tags=["Dashboard"])
 def dashboard_file(session: SessionDep, user = Depends(get_user)):
 
@@ -125,9 +117,6 @@ def dashboard_file(session: SessionDep, user = Depends(get_user)):
             }
         )
 
-
-
-# ! ดึงข้อมูลห้องแชททั้งหมด
 
 @app.get("/dashboard/chat", tags=["Dashboard"])
 def dashboard_chat(session: SessionDep, user = Depends(get_user)):
@@ -188,9 +177,6 @@ def dashboard_chat(session: SessionDep, user = Depends(get_user)):
         )
     
 
-
-# ! ดึงข้อมูลข้อความทั้งหมด
-
 @app.get("/dashboard/message", tags=["Dashboard"])
 def dashboard_message(session: SessionDep, user = Depends(get_user)):
     try :
@@ -243,9 +229,6 @@ def dashboard_message(session: SessionDep, user = Depends(get_user)):
             }
         )
 
-
-
-# ! ดึงข้อมูลสถิติภาพรวม
 
 @app.get("/dashboard/board", tags=["Dashboard"])
 def dashboard_board(session: SessionDep, user = Depends(get_user)):
@@ -355,9 +338,6 @@ def dashboard_board(session: SessionDep, user = Depends(get_user)):
         )
 
 
-
-# ! ดึงข้อมูลผู้ใช้งาน
-
 @app.post("/dashboard/profile", tags=["Dashboard"])
 def dashboard_profile(data: DashboardID, session: SessionDep, user = Depends(get_user)):
     try :
@@ -448,9 +428,6 @@ def dashboard_profile(data: DashboardID, session: SessionDep, user = Depends(get
         )
 
 
-
-# ! ดึงข้อมูลห้องแชท
-
 @app.post("/dashboard/profile_chat", tags=["Dashboard"])
 def dashboard_profile_chat(data: DashboardID, session: SessionDep, user = Depends(get_user)):
     try :
@@ -537,9 +514,6 @@ def dashboard_profile_chat(data: DashboardID, session: SessionDep, user = Depend
             }
         )
 
-
-
-# ! อัพโหลดเอกสาร
 
 @app.post("/dashboard/upload_file", tags=["Dashboard"])
 async def dashboard_upload_file(
@@ -672,6 +646,16 @@ async def dashboard_upload_file(
             session.commit()
             session.refresh(upload_file)
 
+            # for index, (chunk_text, vector) in enumerate(zip(data_chunk, data_vector)):
+            #     upload_chunk = RagChunks(
+            #         rag_file_id=upload_file.rag_file_id,
+            #         content=chunk_text,
+            #         vector=vector,
+            #         chunk_index=index
+            #     )
+            #     session.add(upload_chunk)
+            # session.commit()
+
             # * บันทึกเวกเตอร์ลงใน Qdrant
             points = []
             for index, (chunk_text, vector) in enumerate(zip(data_chunk, data_vector), 1):
@@ -725,9 +709,6 @@ async def dashboard_upload_file(
             }
         )
     
-
-
-# ! แก้ไขข้อมูลผู้ใช้งาน
 
 @app.put("/dashboard/edit_user", tags=["Dashboard"])
 def dashboard_edit_user(data: DashboardEditUser, session: SessionDep, user = Depends(get_user)):
@@ -800,9 +781,6 @@ def dashboard_edit_user(data: DashboardEditUser, session: SessionDep, user = Dep
         )
 
 
-
-# ! แก้ไขข้อมูลห้องแชท
-
 @app.put("/dashboard/edit_chat", tags=["Dashboard"])
 def dashboard_edit_chat(data: DashboardEditChat, session: SessionDep, user = Depends(get_user)):
     print(f"ID {user["id"]} Edit Chat ID {data.id}")
@@ -863,9 +841,6 @@ def dashboard_edit_chat(data: DashboardEditChat, session: SessionDep, user = Dep
             }
         )
 
-
-
-# ! แก้ไขข้อมูลเอกสาร
 
 @app.put("/dashboard/edit_file", tags=["Dashboard"])
 def dashboard_edit_file(data: DashboardEditFile, session: SessionDep, user = Depends(get_user)):
@@ -969,9 +944,7 @@ def dashboard_edit_file(data: DashboardEditFile, session: SessionDep, user = Dep
         )
 
 
-
-# ! ลบผู้ใช้งาน
-
+# ! delete user
 @app.delete("/dashboard/delete_user", tags=["Dashboard"])
 async def dashboard_delete_user(request: Request, session: SessionDep, user = Depends(get_user)):
     data = await request.json()
@@ -1033,9 +1006,7 @@ async def dashboard_delete_user(request: Request, session: SessionDep, user = De
         )
 
 
-
-# ! ลบห้องแชท
-
+# ! delete chat
 @app.delete("/dashboard/delete_chat", tags=["Dashboard"])
 async def dashboard_delete_chat(request: Request, session: SessionDep, user = Depends(get_user)):
     data = await request.json()
@@ -1096,10 +1067,7 @@ async def dashboard_delete_chat(request: Request, session: SessionDep, user = De
             }
         )
     
-
-
-# ! ลบข้อความ
-
+# ! delete message
 @app.delete("/dashboard/delete_message", tags=["Dashboard"])
 async def dashboard_delete_message(request: Request, session: SessionDep, user = Depends(get_user)):
     data = await request.json()
@@ -1161,9 +1129,7 @@ async def dashboard_delete_message(request: Request, session: SessionDep, user =
         )
 
 
-
-# ! ลบเอกสาร
-
+# ! delete file
 @app.delete("/dashboard/delete_file", tags=["Dashboard"])
 async def dashboard_delete_file(request: Request, session: SessionDep, user = Depends(get_user)):
     data = await request.json()
@@ -1250,9 +1216,7 @@ async def dashboard_delete_file(request: Request, session: SessionDep, user = De
         )
 
 
-
-# ! ดาวน์โหลดเอกสาร
-
+# * download file
 @app.post("/dashboard/download_file", tags=["Dashboard"])
 async def dashboard_download_file(data: DashboardID, session: SessionDep, user = Depends(get_user)):
 
@@ -1321,3 +1285,9 @@ async def dashboard_download_file(data: DashboardID, session: SessionDep, user =
                 "data": {}
             }
         )
+
+
+# ! รัน FastAPI
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8030)

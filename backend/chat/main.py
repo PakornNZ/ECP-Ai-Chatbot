@@ -348,7 +348,7 @@ def handle_message(event: MessageEvent):
                 session.add(new_user)
                 session.commit()
 
-            time = datetime.now() - timedelta(hours=12)
+            time = datetime.now() - timedelta(hours=1)
             recent_messages = session.exec(
                 select(LineMessages)
                 .where(
@@ -364,6 +364,7 @@ def handle_message(event: MessageEvent):
             if recent_messages:
                 recent_query = format_recent_query(user_message, recent_messages)
                 recent_message_text = format_recent_message(recent_messages)
+                # recent_message_text = ""
             response = modelAi_response_user_llamaindex(user_message, recent_message_text, recent_query)
             
             if response == "":
@@ -456,14 +457,72 @@ def handle_location(event: MessageEvent):
 
 
 
+
+
+# ! ใข้สำหรับทดสอบ
+
+@app.post("/chat/testing", tags=["TEST"])
+def testing (data: GuestResponeChatSchema):
+    try :
+        respone = modelAi_response_testing_llamaindex(data.message)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": 1,
+                "message": "",
+                "data": {
+                    "answer": respone
+                }
+            }
+        )
+    except Exception as error :
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": 0,
+                "message": str(error),
+                "data": {}
+            }
+        )
+
+
+
+# ! ใช้สำหรับทดสอบ ตั้งชื่อหัวข้อการสนทนา
+
+@app.post("/chat/testing_topic", tags=["TEST"])
+async def testing_topic (data: GuestResponeChatSchema):
+    try :
+        respone = modelAi_topic_chat(data.message)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": 1,
+                "message": "",
+                "data": {
+                    "answer": respone
+                }
+            }
+        )
+    except Exception as error :
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": 0,
+                "message": str(error),
+                "data": {}
+            }
+        )
+    
+
+
 # ! เรียก Ollama
 
-# async def call_ollama():
-#     try:
-#         await modelAi_call_ollama()
-#     except Exception as e:
-#         print(f"Not found ollama model: {e}")
-# from apscheduler.schedulers.asyncio import AsyncIOScheduler
+async def call_ollama():
+    try:
+        await modelAi_call_ollama()
+    except Exception as e:
+        print(f"Not found ollama model: {e}")
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 # scheduler = AsyncIOScheduler()
 # scheduler.add_job(func=call_ollama, trigger='interval', minutes=4)
