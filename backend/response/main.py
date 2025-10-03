@@ -107,9 +107,15 @@ def retriever_context_with_llamaindex(
 
 
 # ! สร้างคำถามจากโมเดล AI สำหรับผู้ใช้งาน
+from pythainlp import correct
+from pythainlp.tokenize import word_tokenize
 
 def modelAi_response_guest_llamaindex(query: str) -> str:
     try:
+        # query = correct(query)
+        # query = ' '.join(word_tokenize(query, engine='newmm'))
+        # print(f"Correct Query: {query}")
+
         vector_data, verify_date = retriever_context_with_llamaindex(
             user_query=query
         )
@@ -117,16 +123,14 @@ def modelAi_response_guest_llamaindex(query: str) -> str:
 # [ROLE]: You are an intelligent assistant that answers questions **only in Thai**.  
 # You must use only the information from [REFERENCE DATA].
         prompt = f"""
------
-[USER QUERY]:
-{query}
------
-
 {"[DATE HINT]: " + verify_date if verify_date else "" + "\n"}
 -----
 [REFERENCE DATA]:
 {vector_data if vector_data else "-"}
 -----
+
+[USER QUERY]:
+{query}
 """
 
         answer = model_generate_answer(prompt)
@@ -141,6 +145,10 @@ def modelAi_response_user_llamaindex(
     recent_message_text: str | None = None,
     recent_query: str | None = None
 ) -> str:
+    # query = correct(query)
+    # query = ' '.join(word_tokenize(query, engine='newmm'))
+    # print(f"Correct Query: {query}")
+    
     query_search = query
     if recent_query != "" and recent_query is not None:
         query_search = recent_query
@@ -158,11 +166,6 @@ def modelAi_response_user_llamaindex(
 # [ROLE]: You are an intelligent assistant that answers questions **only in Thai**.  
 # You must use only the information from [REFERENCE DATA].
         prompt = f"""
------
-[USER QUERY]:
-{query}
------
-
 {"[DATE HINT]: " + verify_date if verify_date else "" + "\n"}
 -----
 [REFERENCE DATA]:
@@ -174,6 +177,9 @@ def modelAi_response_user_llamaindex(
 {recent_message_text}
 -----
 """ if recent_message_text else "" }
+
+[USER QUERY]:
+{query}
 """
 
         answer = model_generate_answer(prompt)
@@ -285,8 +291,8 @@ def format_recent_query(query: str, recent_message: list[dict]) -> str:
 # ! สร้างคำตอบจากโมเดล AI
 
 def model_generate_answer(prompt: str) -> str:
-    # print("-------------------------------------------------------------------")
-    # print(f"Prompt: \n\n{prompt}")
+    print("-------------------------------------------------------------------")
+    print(f"Prompt: \n\n{prompt}")
 
 
     message = [
