@@ -13,7 +13,8 @@
 .edit-chat-bubble {
     display: flex;
     align-items: flex-end;
-    margin: 0 10px;
+    margin: 5px;
+    /* margin: 0 10px; */
 }
 
 .edit-chat-bubble button {
@@ -23,16 +24,24 @@
     border-radius: 8px;
     display: flex;
     margin: 0 3px;
-    opacity: 0;
+    /* opacity: 0; */
+
+    /* transition: all 0.3s ease-in-out; */
+}
+
+.edit-chat-bubble svg {
+    /* margin: 5px; */
+    padding: 5px;
+    width: 17px;
+    height: 17px;
+    color: var(--color-font);
+    opacity: 0.5;
 
     transition: all 0.3s ease-in-out;
 }
 
-.edit-chat-bubble svg {
-    margin: 5px;
-    width: 18px;
-    height: 18px;
-    color: var(--color-font);
+.edit-chat-bubble svg:hover {
+    opacity: 1;
 }
 
 .edit-chat-bubble .edit-button:hover {
@@ -47,7 +56,7 @@
 /* * จัดการแชท */
 .manage-chat {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     margin-top: 20px;
     opacity: 0.5;
@@ -55,7 +64,8 @@
     transition: all 0.3s ease-in-out;
 }
 
-.manage-chat button {
+.manage-chat button,
+.edit-chat-bubble .chat-bubble {
     all: unset;
     background: var(--background);
     position: relative;;
@@ -66,11 +76,13 @@
     transition: all 0.3s ease-in-out;
 }
 
-.manage-chat .copy-button.play svg {
+.manage-chat .copy-button.play svg,
+.edit-chat-bubble .copy-button.play svg {
     transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
-.manage-chat .copy-button.play svg{
+.manage-chat .copy-button.play svg,
+.edit-chat-bubble .copy-button.play svg {
     animation: copy 0.5s ease-in-out;
 }
 
@@ -92,15 +104,19 @@
 }
 
 .manage-chat svg {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
     padding: 5px;
     color: var(--color-font);
 
     transition: fill 0.2s ease;
 }
 
-.manage-chat .copy-button:hover, .rate-for-bot:hover {
+.manage-chat .copy-button:hover,
+.rate-for-bot:hover,
+.edit-chat-bubble .copy-button:hover,
+.manage-chat .like-button:hover,
+.manage-chat .dislike-button:hover {
     background: var(--object);
 }
 
@@ -113,6 +129,7 @@
     width: 28px;
     height: 28px;
     border-radius: 8px;
+    /* margin-right: 5px; */
 
     transition: width 0.5s ease-in-out;
 }
@@ -125,6 +142,7 @@
     opacity: 0;
     font-size: 14px;
     visibility: hidden;
+    position: relative;
 
     transition: all 0.3s ease-in-out;
 }
@@ -138,17 +156,22 @@
     width: calc(28px * 5);
 }
 
-.manage-chat .rate-for-bot.show svg{
+.manage-chat .rate-for-bot.show svg,
+.manage-chat .like-button.show svg,
+.manage-chat .dislike-button.show svg {
     color: var(--color-main);
 }
 
-.manage-chat .rate-for-bot:hover svg{
+.manage-chat .rate-for-bot:hover svg,
+.manage-chat .like-button:hover svg,
+.manage-chat .dislike-button:hover svg{
     color: var(--color-main);
 }
 
 .chat-bubble-user {
     display: flex;
-    justify-content: flex-end;
+    align-items: flex-end;
+    flex-direction: column;
     position: relative;
     width: 100%;
     padding-bottom: 30px;

@@ -76,3 +76,6 @@ class DashboardEditFile(SQLModel):
     name: str
     detail: str | None
     type: str
+
+class ChangeRatingSchema(SQLModel):
+    status: bool

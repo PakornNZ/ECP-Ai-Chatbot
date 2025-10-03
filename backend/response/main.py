@@ -112,9 +112,9 @@ from pythainlp.tokenize import word_tokenize
 
 def modelAi_response_guest_llamaindex(query: str) -> str:
     try:
-        # query = correct(query)
-        # query = ' '.join(word_tokenize(query, engine='newmm'))
-        # print(f"Correct Query: {query}")
+        query = correct(query)
+        query = ' '.join(word_tokenize(query, engine='newmm'))
+        print(f"Correct Query: {query}")
 
         vector_data, verify_date = retriever_context_with_llamaindex(
             user_query=query
@@ -145,9 +145,9 @@ def modelAi_response_user_llamaindex(
     recent_message_text: str | None = None,
     recent_query: str | None = None
 ) -> str:
-    # query = correct(query)
-    # query = ' '.join(word_tokenize(query, engine='newmm'))
-    # print(f"Correct Query: {query}")
+    query = correct(query)
+    query = ' '.join(word_tokenize(query, engine='newmm'))
+    print(f"Correct Query: {query}")
     
     query_search = query
     if recent_query != "" and recent_query is not None:

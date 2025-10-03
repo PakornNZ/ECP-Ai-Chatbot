@@ -5,7 +5,7 @@ import LogoWhite from "@/public/logo/logo-white.svg"
 import GoogleLogo from "@/public/logo/google-brands.svg"
 import LineLogo from "@/public/logo/line-brands.svg"
 import { useOnClickOutside } from "@/app/components/useOnClickOutside";
-import { Copy, Heart, Check, AtSign, CircleAlert, X, Mail, ChevronDown, Trash2 } from 'lucide-react'
+import { Copy, Heart, Check, AtSign, CircleAlert, X, Mail, ChevronDown, Trash2, ThumbsUp, ThumbsDown } from 'lucide-react'
 import "@/app/styles/style-Object.css"
 import { Ellipsis } from 'react-css-spinners'
 import { useEffect, useRef, useState } from 'react'
@@ -110,9 +110,10 @@ interface ManageChatProps {
     msg_id: number | null
     answer: string | null
     isRating: number
+    content: boolean
 }
 
-export const ManageChat = ({ msg_id, answer, isRating } : ManageChatProps ) => {
+export const ManageChat = ({ msg_id, answer, isRating, content } : ManageChatProps ) => {
     const { data : session } = useSession()
     const [rating, setRating] = useState<number>(0)
     const [hover, setHover] = useState<number | null>(null)
@@ -243,28 +244,45 @@ export const ManageChat = ({ msg_id, answer, isRating } : ManageChatProps ) => {
         <>
             <Arlert messageArlert={arlertMessage} />
             <div className="manage-chat">
-                { session && (
-                    <>
-                        <p className={`rating ${ hover || rating > 0 ? "show" : "" }`}>{ rating == 0 || hover ? hover : rating} คะแนน</p>
-                        <div className={`rate-for-bot ${ rating > 0 ? "show" : "" }`}
-                            onMouseLeave={() => {
-                                handleExpand(false)
-                                handleDisplayRating(0)
-                            }}
-                            onMouseEnter={() => handleExpand(true)}>
-                            {[1, 2, 3, 4, 5].map((value) => (
-                                <Heart key={value}
-                                    onClick={() => {if (isExpanded) handRating(value)}}
-                                    onMouseEnter={() => {if (isExpanded) handleDisplayRating(value)}}
-                                    fill={ (hover ?? rating) >= value ? "var(--color-main)" : "none" }
-                                />
-                            ))}
-                        </div>
-                    </>
-                )}
-                <button type="button" right-title="คัดลอก" onClick={handleCopy} className={`copy-button ${playAnimation ? "play" : ""}`}>
+                <button type="button" left-title="คัดลอก" onClick={handleCopy} className={`copy-button ${playAnimation ? "play" : ""}`}>
                     {isCopy ? <Check /> : <Copy />}
                 </button>
+                { session && (
+                    <>
+                        { !content ? (
+                            <>
+                                <div className={`rate-for-bot ${ rating > 0 ? "show" : "" }`}
+                                    onMouseLeave={() => {
+                                        handleExpand(false)
+                                        handleDisplayRating(0)
+                                    }}
+                                    onMouseEnter={() => handleExpand(true)}>
+                                    {[1, 2, 3, 4, 5].map((value) => (
+                                        <Heart key={value}
+                                            onClick={() => {if (isExpanded) handRating(value)}}
+                                            onMouseEnter={() => {if (isExpanded) handleDisplayRating(value)}}
+                                            fill={ (hover ?? rating) >= value ? "var(--color-main)" : "none" }
+                                        />
+                                    ))}
+                                </div>
+                                <p className={`rating ${ hover || rating > 0 ? "show" : "" }`}>{ rating == 0 || hover ? hover : rating} คะแนน</p>
+                            </>
+                        ) : (
+                            <>
+                                <button type="button" left-title="ชอบคำตอบนี้" className={`like-button ${ rating > 1 ? "show" : "" }`}
+                                    onClick={() => handRating(5)}
+                                >
+                                    <ThumbsUp fill={ (hover ?? rating) > 1 ? "var(--color-main)" : "none" }/>
+                                </button>
+                                <button type="button" left-title="ไม่ชอบคำตอบนี้" className={`dislike-button ${ rating == 1 ? "show" : "" }`}
+                                    onClick={() => handRating(1)}
+                                >
+                                    <ThumbsDown fill={ (hover ?? rating) == 1 ? "var(--color-main)" : "none" }/>
+                                </button>
+                            </>
+                        )}
+                    </>
+                )}
             </div>  
         </>
     )

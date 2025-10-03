@@ -524,6 +524,6 @@ async def call_ollama():
         print(f"Not found ollama model: {e}")
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-scheduler = AsyncIOScheduler()
-scheduler.add_job(func=call_ollama, trigger='interval', minutes=4)
-scheduler.start()
+# scheduler = AsyncIOScheduler()
+# scheduler.add_job(func=call_ollama, trigger='interval', minutes=4)
+# scheduler.start()

@@ -10,6 +10,8 @@ import { FolderOpen, Heart, ShieldUser, UserRound } from "lucide-react"
 import { useEffect, useState } from "react"
 import Image from 'next/image'
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { Arlert } from "@/app/components/object/object"
 
 interface RatingBoardProps {
     rating: number,
@@ -95,6 +97,85 @@ export default function Dashboard () {
         return `${value}${suffix}`
     }
 
+    const { data: session } = useSession()
+
+    // * ข้อความแจ้งเตือน
+    const [arlertMessage, setArlertMessage] = useState({
+        color: true,
+        message: ""
+    })
+    
+    const [content, setContent] = useState<boolean>(false)
+    useEffect(() => {
+        if (typeof session === "undefined") return
+        fetchContent()
+    }, [session])
+
+    const fetchContent = async () => {
+        try {
+            const res = await axios.get('/api/data/content/check')
+            const resData = res.data
+            if (resData.status === 1) {
+                setContent(resData.data.status)
+            }
+        } catch (error) {
+            if (!axios.isAxiosError(error)) return
+            const errorMessage = error.response?.data?.message
+            setArlertMessage({
+                color: false,
+                message: errorMessage
+            })
+            const timeOutAPI = setTimeout(() => {
+                setArlertMessage({
+                    color: false,
+                    message: ""
+                })
+            }, 6000)
+            return () => clearTimeout(timeOutAPI)
+        }
+    }
+
+    const changeContent = async () => {
+        const payload = {
+            status: !content
+        }
+        setContent(!content)
+        try {
+            const res = await axios.put('/api/data/content/change', payload)
+            const resData = res.data
+            if (resData.status === 1) {
+                setArlertMessage({
+                    color: true,
+                    message: "เปลี่ยนการให้คะแนนเรียบร้อย"
+                })
+                setContent(resData.data.status)
+                const timeOutAPI = setTimeout(() => {
+                    setArlertMessage({
+                        color: true,
+                        message: ""
+                    })
+                }, 6000)
+                return () => clearTimeout(timeOutAPI)
+            }
+        } catch (error) {
+            if (!axios.isAxiosError(error)) return
+            const errorMessage = error.response?.data?.message
+
+            setContent(!content)
+            setArlertMessage({
+                color: false,
+                message: errorMessage
+            })
+            const timeOutAPI = setTimeout(() => {
+                setArlertMessage({
+                    color: false,
+                    message: ""
+                })
+            }, 6000)
+            return () => clearTimeout(timeOutAPI)
+        }
+    }
+
     if (isLoading) {
         return <Loading />
     }
@@ -104,6 +185,7 @@ export default function Dashboard () {
 
     return (
         <>
+            <Arlert messageArlert={arlertMessage} />
             <div className="station">
                 <div className="total-station">
                     <div className="total-station-bg" onClick={() => router.push('/dashboard/users')}>
@@ -138,6 +220,13 @@ export default function Dashboard () {
                             <h1>{boardData?.rating.avg}<span>คะแนน</span></h1>
                             <p>จำนวนการให้คะแนนทั้งหมด {formatFullNumber(boardData?.rating.total ?? 0)} ครั้ง</p>
                             <Heart className="svg-fade heart"/>
+                        </div>
+                        <div className="rating-change">
+                            <p>เปลี่ยนการให้คะแนน (แบบกดถูกใจ)</p>
+                            <label className="switch">
+                                <input type="checkbox" checked={content} onChange={changeContent}/>
+                                <span className="slider round"></span>
+                            </label>
                         </div>
                         <div className="rating-score">
                             {boardData?.rating.detail.map((data, index) => 

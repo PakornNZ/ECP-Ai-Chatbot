@@ -281,3 +281,116 @@ async def user_new_chat(session: SessionDep, user = Depends(get_user)):
                 "data": {}
             }
         )
+    
+
+
+# ! ตรวจสอบสถานะการให้คะแนน
+
+@app.get("/data/check_rating", tags=["DATA"])
+def check_rating(session: SessionDep, user = Depends(get_user)):
+
+    try :
+        check_rating = session.exec(
+            select(WebSystems).where(WebSystems.content == "rating")
+        ).first()
+
+        if not check_rating:
+            new_content = WebSystems(
+                content="rating",
+                status=False,
+                create_at=datetime.now()
+            )
+
+            session.add(new_content)
+            session.commit()
+
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": 1,
+                    "message": "",
+                    "data": {
+                        "status": new_content.status
+                    }
+                }
+            )
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": 1,
+                "message": "",
+                "data": {
+                    "status": check_rating.status
+                }
+            }
+        )
+    
+    except Exception as error :
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": 0,
+                "message": str(error),
+                "data": {}
+            }
+        )
+    
+
+
+# ! เปลี่ยนการให้คะแนน
+@app.put("/data/change_rating", tags=["DATA"])
+def change_rating(data: ChangeRatingSchema, session: SessionDep, user = Depends(get_user)):
+
+    try :
+        find_content = session.exec(
+            select(WebSystems).where(WebSystems.content == "rating")
+        ).first()
+
+        if not find_content:
+            new_content = WebSystems(
+                content="rating",
+                status=data.status,
+                create_at=datetime.now()
+            )
+
+            session.add(new_content)
+            session.commit()
+
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": 1,
+                    "message": "",
+                    "data": {
+                        "status": new_content.status
+                    }
+                }
+            )
+        
+        find_content.status = data.status
+        find_content.update_at = datetime.now()
+
+        session.add(find_content)
+        session.commit()
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": 1,
+                "message": "",
+                "data": {
+                    "status": find_content.status
+                }
+            }
+        )
+    
+    except Exception as error :
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": 0,
+                "message": str(error),
+                "data": {}
+            }
+        )

@@ -124,3 +124,12 @@ class LineMessages(SQLModel, table = True):
     create_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now()))
     update_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now()))
     lineuser: Optional[LineUsers] = Relationship(back_populates="linemessage", sa_relationship_kwargs={"passive_deletes": True})
+
+
+class WebSystems(SQLModel, table = True):
+    __tablename__ = "web_systems"
+    web_system_id: int | None = Field(default=None, primary_key=True)
+    content: Optional[str] = Field(default=None, sa_column=Column(Text))
+    status: Optional[bool] = False
+    create_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now()))
+    update_at: datetime = Field(sa_column=Column(DateTime(timezone=True), server_default=func.now()))
