@@ -3,6 +3,9 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import LineProvider from "next-auth/providers/line"
+import { custom } from "openid-client"
+
+custom.setHttpOptionsDefaults({ timeout: 10000 })
 
 const API = process.env.PRIVATE_API_AUTH
 const handler = NextAuth({

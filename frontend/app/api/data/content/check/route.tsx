@@ -1,28 +1,11 @@
 import axios from "axios";
-import { getToken } from "next-auth/jwt";
-import jwt from "jsonwebtoken";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const API = process.env.PRIVATE_API_DATA
-const secret = process.env.NEXTAUTH_SECRET
-export async function GET(req: NextRequest) {
-    const token = await getToken({ req, secret })
-    if (!token) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-    
-    if (!secret) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-    const tokenPayload = { id: token.id, email_verified: token.email_verified }
-    const jwtToken = jwt.sign(tokenPayload, secret, { algorithm: 'HS256', expiresIn: '1m' })
+export async function GET() {
 
     try {
-        const res = await axios.get(`${API}/data/check_rating`, {
-            headers: {
-                Authorization: 'Bearer ' + jwtToken
-            }
-        })
+        const res = await axios.get(`${API}/data/check_rating`)
 
         return NextResponse.json(res.data)
     } catch (error: unknown) {
