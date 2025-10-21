@@ -91,6 +91,6 @@ Once ready, you can access and interact with the chatbot.
 ```
 This will allow Docker to allocate GPU resources for model inference, which can significantly improve performance.
 
-Resend API: [Resend](https://resend.com/emails)
-Typhoon API: [Typhoon API](https://playground.opentyphoon.ai/)
+Resend API: [Resend](https://resend.com/emails) \
+Typhoon API: [Typhoon API](https://playground.opentyphoon.ai/) \
 Dataset: [Google Drive](https://drive.google.com/drive/folders/1HCiKwp1E4tvrADRqfJZ3mRCO1HuYxFvG?usp=sharing)
