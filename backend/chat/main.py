@@ -457,8 +457,6 @@ def handle_location(event: MessageEvent):
 
 
 
-
-
 # ! ใข้สำหรับทดสอบ
 
 @app.post("/chat/testing", tags=["TEST"])

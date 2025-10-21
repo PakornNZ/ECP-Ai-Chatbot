@@ -646,16 +646,6 @@ async def dashboard_upload_file(
             session.commit()
             session.refresh(upload_file)
 
-            # for index, (chunk_text, vector) in enumerate(zip(data_chunk, data_vector)):
-            #     upload_chunk = RagChunks(
-            #         rag_file_id=upload_file.rag_file_id,
-            #         content=chunk_text,
-            #         vector=vector,
-            #         chunk_index=index
-            #     )
-            #     session.add(upload_chunk)
-            # session.commit()
-
             # * บันทึกเวกเตอร์ลงใน Qdrant
             points = []
             for index, (chunk_text, vector) in enumerate(zip(data_chunk, data_vector), 1):
@@ -1285,9 +1275,3 @@ async def dashboard_download_file(data: DashboardID, session: SessionDep, user =
                 "data": {}
             }
         )
-
-
-# ! รัน FastAPI
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8030)

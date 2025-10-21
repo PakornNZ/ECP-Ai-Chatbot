@@ -23,9 +23,6 @@ tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
-# OLLAMA_URL = os.getenv("OLLAMA_URL")
-# EMBEDDING_URL = f"{OLLAMA_URL}/embeddings"
-
 
 
 # ! แยกข้อความเป็นบล็อก
@@ -79,8 +76,6 @@ def clean_text(text: str) -> str:
     text = re.sub(r'(\|\s*)+', '', text)
     text = re.sub(r'<td>\s*</td>', '-', text)
     text = re.sub(r'[\u200b\u200c\u200d]', '', text)
-    # text = re.sub(r'<td>\s*(.*?)\s*</td>', r'| \1 ', text)
-    # text = re.sub(r'(?:\| [^\n]+)+', lambda m: m.group(0) + '', text)
     return text.strip()
 
 
@@ -102,17 +97,6 @@ def model_embed(chunks: list[str]) -> list[list[float]]:
     cleaned_chunks = [clean_chunks(chunk) for chunk in chunks]
     embeddings = embedding_model.encode(cleaned_chunks, normalize_embeddings=True)
     return embeddings.tolist()
-        # payload = {
-        #     "model": EMBEDDING_MODEL,
-        #     "prompt": chunk
-        # }
-        # response = requests.post(EMBEDDING_URL, json=payload)
-        # response.raise_for_status()
-        # embedding = np.array(response.json()["embedding"], dtype=np.float32)
-        # norm = np.linalg.norm(embedding)
-        # if norm > 0:
-        #     embedding = embedding / norm
-        # embeddings.append(embedding.tolist())
 
 
 
@@ -389,6 +373,4 @@ def convert_record_to_text(record: list[dict]) -> list[str]:
                     text += f"{key}: {value}\n"
                 text += "\n"
             texts.append(text.strip())
-        
-
     return texts

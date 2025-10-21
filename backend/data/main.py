@@ -287,7 +287,7 @@ async def user_new_chat(session: SessionDep, user = Depends(get_user)):
 # ! ตรวจสอบสถานะการให้คะแนน
 
 @app.get("/data/check_rating", tags=["DATA"])
-def check_rating(session: SessionDep, user = Depends(get_user)):
+def check_rating(session: SessionDep):
 
     try :
         check_rating = session.exec(
