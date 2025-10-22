@@ -168,10 +168,10 @@ export default function Chat({ MoveSection, message, isLoading, onUpdateQuery, o
     }, [playAnimation])
 
     const [content, setContent] = useState<boolean>(false)
-    // useEffect(() => {
-    //     if (typeof session === "undefined") return
-    //     fetchContent()
-    // }, [session])
+    useEffect(() => {
+        if (typeof session === "undefined") return
+        fetchContent()
+    }, [session])
 
     const fetchContent = async () => {
         try {
