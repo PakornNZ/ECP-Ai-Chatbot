@@ -35,7 +35,7 @@ LINE_CHANNEL_SECRET=""
 RESPONSE_MODEL="guff_model_8b-q4_k_m.gguf"
 ```
 Endpoint for Google ouath ```http://localhost:3000/api/auth/callback/google```\
-Endpoint for Line Login ```https://localhost:8020/api/auth/callback/line```\
+Endpoint for Line Login ```http://localhost:3000/api/auth/callback/line```\
 Endpoint for Line webhook ```https://localhost:8020/ecp-ai/chat/webhook```\
 \
 **Step 2. Download Embedding Model**\
