@@ -34,6 +34,9 @@ LINE_CHANNEL_ACCESS_TOKEN=""
 LINE_CHANNEL_SECRET=""
 RESPONSE_MODEL="guff_model_8b-q4_k_m.gguf"
 ```
+Endpoint for Google ouath ```http://localhost:3000/api/auth/callback/google```\
+Endpoint for Line Login ```http://localhost:3000/api/auth/callback/line```\
+Endpoint for Line webhook ```https://localhost:8020/ecp-ai/chat/webhook```\
 \
 **Step 2. Download Embedding Model**\
 Download the `bge-m3` embedding model from Hugging Face: [Download bge-m3.](https://huggingface.co/BAAI/bge-m3)
@@ -89,8 +92,19 @@ Once ready, you can access and interact with the chatbot.
 #           capabilities: [gpu]
 #           count: all
 ```
-This will allow Docker to allocate GPU resources for model inference, which can significantly improve performance.
+This will allow Docker to allocate GPU resources for model inference, which can significantly improve performance.\
+
+Config Role :
+```
+docker exec -it database-postgres psql -U postgres -d ecp-ai -h localhost -p 5432
+```
+```
+UPDATE web_users SET role_id = 2 WHERE web_user_id = {user id};
+```
 
 Resend API: [Resend](https://resend.com/emails) \
 Typhoon API: [Typhoon](https://playground.opentyphoon.ai/) \
+Google API: [Google Cloud](https://cloud.google.com/?hl=th) \
+Line Login: [LINE Developers](https://developers.line.biz/en/) \
+Line Chat: [Line Business ID](https://account.line.biz/login?redirectUri=https%3A%2F%2Faccount.line.biz%2Foauth2%2Fcallback%3Fclient_id%3D10%26code_challenge%3DNWY0N8kGJX2pa8x32N_umtI-uGfOqxoG5odF61qFsZ4%26code_challenge_method%3DS256%26redirect_uri%3Dhttps%253A%252F%252Fmanager.line.biz%252Fapi%252Foauth2%252FbizId%252Fcallback%26response_type%3Dcode%26state%3DdSGxkBUVtfhiqZtHyLRe3opxgm9AHPO5) \
 Dataset: [Google Drive](https://drive.google.com/drive/folders/1HCiKwp1E4tvrADRqfJZ3mRCO1HuYxFvG?usp=sharing)
