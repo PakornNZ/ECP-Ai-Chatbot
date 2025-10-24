@@ -94,9 +94,13 @@ Once ready, you can access and interact with the chatbot.
 ```
 This will allow Docker to allocate GPU resources for model inference, which can significantly improve performance.\
 
-Config Role :\
-```$ docker exec -it database-postgres psql -U postgres -d ecp-ai -h localhost -p 5432```\
-```$ UPDATE web_users SET role_id = 2 WHERE web_user_id = {user id};```
+Config Role :
+```
+docker exec -it database-postgres psql -U postgres -d ecp-ai -h localhost -p 5432
+```
+```
+UPDATE web_users SET role_id = 2 WHERE web_user_id = {user id};
+```
 
 Resend API: [Resend](https://resend.com/emails) \
 Typhoon API: [Typhoon](https://playground.opentyphoon.ai/) \
