@@ -8,8 +8,10 @@ import re
 load_dotenv()
 
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
-RESPONSE_URL = os.getenv("OLLAMA_URL")
 RESPONSE_MODEL = os.getenv("RESPONSE_MODEL")
+OLLAMA_HOST = os.getenv("OLLAMA_HOST")
+OLLAMA_PORT = os.getenv("OLLAMA_PORT")
+RESPONSE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/chat"
 
 
 

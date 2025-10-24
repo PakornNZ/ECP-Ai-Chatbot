@@ -19,8 +19,9 @@ import re
 from dotenv import load_dotenv
 load_dotenv()
 
-tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-m3")
+EMBEDDING_TOKENIZER = os.getenv("EMBEDDING_TOKENIZER")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
+tokenizer = AutoTokenizer.from_pretrained(EMBEDDING_TOKENIZER)
 embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
 
