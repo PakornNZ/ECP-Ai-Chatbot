@@ -104,4 +104,7 @@ UPDATE web_users SET role_id = 2 WHERE web_user_id = {user id};
 
 Resend API: [Resend](https://resend.com/emails) \
 Typhoon API: [Typhoon](https://playground.opentyphoon.ai/) \
+Google API: [Google Cloud](https://cloud.google.com/?hl=th) \
+Line Login: [LINE Developers](https://developers.line.biz/en/) \
+Line Chat: [Line Business ID](https://account.line.biz/login?redirectUri=https%3A%2F%2Faccount.line.biz%2Foauth2%2Fcallback%3Fclient_id%3D10%26code_challenge%3DNWY0N8kGJX2pa8x32N_umtI-uGfOqxoG5odF61qFsZ4%26code_challenge_method%3DS256%26redirect_uri%3Dhttps%253A%252F%252Fmanager.line.biz%252Fapi%252Foauth2%252FbizId%252Fcallback%26response_type%3Dcode%26state%3DdSGxkBUVtfhiqZtHyLRe3opxgm9AHPO5) \
 Dataset: [Google Drive](https://drive.google.com/drive/folders/1HCiKwp1E4tvrADRqfJZ3mRCO1HuYxFvG?usp=sharing)
